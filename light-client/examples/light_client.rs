@@ -20,7 +20,7 @@ use tendermint_light_client::{
     peer_list::PeerList,
     state::State,
     store::{sled::SledStore, LightStore},
-    types::{Height, PeerId, Status, TrustThreshold},
+    types::{Height, LightBlock, PeerId, Status, TMLightBlock, TrustThreshold},
 };
 
 #[derive(Debug, Options)]
@@ -81,7 +81,7 @@ fn make_instance(
     addr: tendermint::net::Address,
     db_path: impl AsRef<Path>,
     opts: &SyncOpts,
-) -> Instance {
+) -> Instance<TMLightBlock> {
     let mut peer_map = HashMap::new();
     peer_map.insert(peer_id, addr);
 

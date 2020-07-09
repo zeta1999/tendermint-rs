@@ -2,6 +2,7 @@ use jsonrpc_core::IoHandler;
 use jsonrpc_http_server::{AccessControlAllowOrigin, DomainsValidation, ServerBuilder};
 
 use tendermint_light_client::supervisor::Handle;
+use tendermint_light_client::types::TMLightBlock;
 
 use crate::error;
 
@@ -15,7 +16,7 @@ pub use sealed::{Client, Rpc, Server};
 /// expose a handle in the future.
 pub fn run<H>(server: Server<H>, addr: &str) -> Result<(), error::Error>
 where
-    H: Handle + Send + Sync + 'static,
+    H: Handle<TMLightBlock> + Send + Sync + 'static,
 {
     let mut io = IoHandler::new();
     io.extend_with(server.to_delegate());
@@ -38,27 +39,27 @@ mod sealed {
     use jsonrpc_derive::rpc;
 
     use tendermint_light_client::supervisor::Handle;
-    use tendermint_light_client::types::LightBlock;
+    use tendermint_light_client::types::TMLightBlock;
 
     #[rpc]
     pub trait Rpc {
         /// Returns the latest trusted block.
         #[rpc(name = "state")]
-        fn state(&self) -> FutureResult<Option<LightBlock>, Error>;
+        fn state(&self) -> FutureResult<Option<TMLightBlock>, Error>;
     }
 
     pub use self::rpc_impl_Rpc::gen_client::Client;
 
     pub struct Server<H>
     where
-        H: Handle + Send + Sync,
+        H: Handle<TMLightBlock> + Send + Sync,
     {
         handle: H,
     }
 
     impl<H> Server<H>
     where
-        H: Handle + Send + Sync,
+        H: Handle<TMLightBlock> + Send + Sync,
     {
         pub fn new(handle: H) -> Self {
             Self { handle }
@@ -67,9 +68,9 @@ mod sealed {
 
     impl<H> Rpc for Server<H>
     where
-        H: Handle + Send + Sync + 'static,
+        H: Handle<TMLightBlock> + Send + Sync + 'static,
     {
-        fn state(&self) -> FutureResult<Option<LightBlock>, Error> {
+        fn state(&self) -> FutureResult<Option<TMLightBlock>, Error> {
             let res = self.handle.latest_trusted().map_err(|e| {
                 let mut err = Error::internal_error();
                 err.message = e.to_string();
@@ -92,7 +93,7 @@ mod test {
 
     use tendermint_light_client::errors::Error;
     use tendermint_light_client::supervisor::Handle;
-    use tendermint_light_client::types::LightBlock;
+    use tendermint_light_client::types::TMLightBlock;
 
     use super::{Client, Rpc as _, Server};
 
@@ -113,9 +114,9 @@ mod test {
 
     struct MockHandle;
 
-    impl Handle for MockHandle {
-        fn latest_trusted(&self) -> Result<Option<LightBlock>, Error> {
-            let block: LightBlock = serde_json::from_str(LIGHTBLOCK_JSON).unwrap();
+    impl Handle<TMLightBlock> for MockHandle {
+        fn latest_trusted(&self) -> Result<Option<TMLightBlock>, Error> {
+            let block: TMLightBlock = serde_json::from_str(LIGHTBLOCK_JSON).unwrap();
 
             Ok(Some(block))
         }

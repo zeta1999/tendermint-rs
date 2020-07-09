@@ -88,8 +88,8 @@ fn initialize_subjectively(
             std::process::exit(1);
         });
 
-    let predicates = ProdPredicates;
-    let hasher = ProdHasher;
+    let predicates = ProdPredicates::default();
+    let hasher = ProdHasher::default();
     if let Err(err) = predicates.validator_sets_match(&trusted_state, &hasher) {
         status_err!("invalid light block: {}", err);
         std::process::exit(1);
