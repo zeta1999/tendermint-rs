@@ -4,7 +4,7 @@ use tendermint::lite::types::Header as _;
 use tendermint::merkle;
 use tendermint::Hash;
 
-pub trait Hasher: Send {
+pub trait Hasher: Sync + Send {
     fn hash_header(&self, header: &Header) -> Hash;
     fn hash_validator_set(&self, validator_set: &ValidatorSet) -> Hash;
 }

@@ -8,7 +8,7 @@ use crate::types::Height;
 /// The scheduler is given access to the light store, in order to optionally
 /// improve performance by picking a next block that has already been fetched.
 #[contract_trait]
-pub trait Scheduler: Send {
+pub trait Scheduler: Sync + Send {
     /// Decides what block to verify next.
     ///
     /// ## Precondition
@@ -27,7 +27,7 @@ pub trait Scheduler: Send {
 }
 
 #[contract_trait]
-impl<F: Send + Clone> Scheduler for F
+impl<F: Sync + Send + Clone> Scheduler for F
 where
     F: Fn(&dyn LightStore, Height, Height) -> Height,
 {

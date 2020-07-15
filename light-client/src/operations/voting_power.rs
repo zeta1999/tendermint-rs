@@ -29,7 +29,7 @@ impl fmt::Display for VotingPowerTally {
     }
 }
 
-pub trait VotingPowerCalculator: Send {
+pub trait VotingPowerCalculator: Sync + Send {
     fn total_power_of(&self, validator_set: &ValidatorSet) -> u64 {
         validator_set
             .validators()

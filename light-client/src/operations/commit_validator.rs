@@ -7,7 +7,7 @@ use crate::{
 use tendermint::block::CommitSig;
 use tendermint::lite::types::ValidatorSet as _;
 
-pub trait CommitValidator: Send {
+pub trait CommitValidator: Sync + Send {
     fn validate(
         &self,
         signed_header: &SignedHeader,
